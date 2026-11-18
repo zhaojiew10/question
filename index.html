@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="分类整理的结构化选择题库，支持在线作答、答案解析与学习进度记录。" />
+    <title>知库 · 大语言模型推理</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="知库首页">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none">
+            <path d="M8 7.5h10a6 6 0 0 1 6 6v11H14a6 6 0 0 1-6-6v-11Z" />
+            <path d="M8 12H6a3 3 0 0 0-3 3v9.5h11" />
+            <path d="M13 12h6M13 16h6" />
+          </svg>
+        </span>
+        <span class="brand-name">知库<span>QUESTION BANK</span></span>
+      </a>
+      <div class="topbar-actions">
+        <span class="local-badge"><i></i>本地题库</span>
+        <button class="reset-button" id="resetButton" type="button" title="清除所有答题记录">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 4v6h6M5.5 15a7 7 0 1 0 .5-7.8L4 10" /></svg>
+          重置进度
+        </button>
+      </div>
+    </header>
+
+    <div class="app-shell">
+      <aside class="sidebar">
+        <section class="collection-card">
+          <p class="section-label">当前题库</p>
+          <div class="collection-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3 4 7l8 4 8-4-8-4Z"/><path d="m4 12 8 4 8-4M4 17l8 4 8-4"/></svg>
+          </div>
+          <h2>大语言模型推理</h2>
+          <p>人工智能 <span>·</span> <strong id="sidebarTotal">0</strong> 道选择题</p>
+          <div class="collection-progress"><i id="sidebarProgressBar"></i></div>
+          <div class="collection-progress-label"><span>学习进度</span><strong id="sidebarProgressText">0 / 0</strong></div>
+        </section>
+
+        <nav class="question-navigation" aria-label="题目导航">
+          <div class="sidebar-heading">
+            <p class="section-label">题目导航</p>
+            <span id="answeredCount">0 已答</span>
+          </div>
+          <div class="question-grid" id="questionNav"></div>
+          <div class="navigation-legend">
+            <span><i class="legend-current"></i>当前</span>
+            <span><i class="legend-correct"></i>答对</span>
+            <span><i class="legend-wrong"></i>答错</span>
+          </div>
+        </nav>
+
+        <section class="knowledge-section">
+          <p class="section-label">核心知识点</p>
+          <div class="knowledge-tags" id="knowledgeTags"></div>
+        </section>
+
+        <div class="sidebar-note">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+          <p>题目按知识点分类整理，答题记录仅保存在当前浏览器。</p>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <section class="page-heading">
+          <div class="breadcrumb"><span>人工智能</span><i>/</i><span>大语言模型推理</span></div>
+          <h1>推理系统专项练习</h1>
+          <p>从 KV Cache 到连续批处理，掌握大模型推理的核心概念。</p>
+          <div class="study-stats">
+            <div><span>题目总数</span><strong id="totalStat">0</strong></div>
+            <i></i>
+            <div><span>已完成</span><strong id="completedStat">0</strong></div>
+            <i></i>
+            <div><span>当前正确率</span><strong id="accuracyStat">—</strong></div>
+          </div>
+        </section>
+
+        <div class="loading-card" id="loadingCard">
+          <span class="loading-spinner"></span>
+          <p>正在载入题目…</p>
+        </div>
+
+        <article class="question-card" id="questionCard" hidden>
+          <header class="question-header">
+            <div class="question-number"><span id="questionNumber">QUESTION 01</span><i></i><span id="questionType">单选题</span></div>
+            <span class="difficulty" id="difficulty">中等</span>
+          </header>
+
+          <div class="question-body">
+            <div class="question-tags" id="questionTags"></div>
+            <h2 class="question-stem" id="questionStem"></h2>
+            <p class="question-instruction">请选择一个正确答案</p>
+            <div class="options-list" id="optionsList" role="group" aria-label="答案选项"></div>
+
+            <section class="explanation" id="explanation" hidden>
+              <div class="explanation-result" id="explanationResult"></div>
+              <div class="explanation-content">
+                <span class="explanation-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M9 18h6M10 22h4M8.5 14.5A7 7 0 1 1 15.5 14.5C14.5 15.3 14 16 14 17h-4c0-1-.5-1.7-1.5-2.5Z"/></svg>
+                </span>
+                <div><h3>答案解析</h3><p id="explanationText"></p></div>
+              </div>
+            </section>
+          </div>
+
+          <footer class="question-footer">
+            <button class="secondary-button" id="previousButton" type="button">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+              上一题
+            </button>
+            <span class="answer-hint" id="answerHint">选择答案后确认</span>
+            <button class="primary-button" id="primaryButton" type="button" disabled>
+              <span>确认答案</span>
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+          </footer>
+        </article>
+
+        <div class="error-card" id="errorCard" hidden>
+          <h2>题目载入失败</h2>
+          <p id="errorMessage"></p>
+          <button type="button" onclick="location.reload()">重新载入</button>
+        </div>
+
+        <footer class="page-footer"><span>知库 · 持续积累，每日进步</span><span>DATA · JSON</span></footer>
+      </main>
+    </div>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>
