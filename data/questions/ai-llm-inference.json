@@ -238,5 +238,65 @@
     "answer": ["D"],
     "explanation": "Chunked prefill 将长提示词拆成多个受 token 预算约束的小块，在不同迭代中逐步处理，并可与 decode 请求混合调度。这样不会消除总 prefill 工作量，但能避免一个长 prefill 独占单次迭代，减小其他 decode 请求的等待时间和延迟尖峰。",
     "tags": ["Chunked Prefill", "混合调度", "延迟优化"]
+  },
+  {
+    "id": "llm-inference-gqa-kv-cache-size",
+    "subject": "人工智能",
+    "chapter": "大语言模型推理",
+    "knowledgePoints": ["GQA", "KV Cache", "显存计算"],
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "另一个模型每层有 H_q = 16 个 query head、H_kv = 2 个 KV head，每个 head 维度 d = 64，使用 FP16。仅看这一层，每缓存一个 token 需要多少字节？",
+    "options": [
+      {
+        "key": "A",
+        "text": "(16 × 64 + 16 × 64) × 2 = 4096 字节"
+      },
+      {
+        "key": "B",
+        "text": "2 × 64 × 2 = 256 字节"
+      },
+      {
+        "key": "C",
+        "text": "(2 × 64 + 2 × 64) × 2 = 512 字节"
+      },
+      {
+        "key": "D",
+        "text": "(2 × 64 + 2 × 64) × 16 × 2 = 8192 字节"
+      }
+    ],
+    "answer": ["C"],
+    "explanation": "每个 token 需要分别缓存 K 和 V，两者都由 KV head 数决定，而不是 query head 数。该层共有 2 × 64 + 2 × 64 = 256 个 FP16 数值，每个数值占 2 字节，因此每缓存一个 token 需要 256 × 2 = 512 字节。",
+    "tags": ["GQA", "KV Cache", "显存计算"]
+  },
+  {
+    "id": "llm-inference-kv-cache-static-reservation",
+    "subject": "人工智能",
+    "chapter": "大语言模型推理",
+    "knowledgePoints": ["KV Cache", "显存预留", "显存利用率"],
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "假设每个请求最多允许生成 4096 个 token。若系统在一开始就按 4096 个 token 为每个请求预留一整段连续 KV 显存，而某请求最终只生成 200 个 token，最直接的问题是什么？",
+    "options": [
+      {
+        "key": "A",
+        "text": "大部分预留空间一直空闲却被独占，减少可同时运行的请求数"
+      },
+      {
+        "key": "B",
+        "text": "历史 K、V 会被重复计算 4096/200 次"
+      },
+      {
+        "key": "C",
+        "text": "每个 token 的注意力必须读取全部 4096 个位置"
+      },
+      {
+        "key": "D",
+        "text": "4096 个位置的 Q 都必须永久保存"
+      }
+    ],
+    "answer": ["A"],
+    "explanation": "按最大长度静态预留时，该请求只使用了 200 个位置，其余 3896 个位置对应的显存仍被独占，无法分配给其他请求。这会降低显存利用率和系统可并发运行的请求数；按需分配 KV block 可以减少这种浪费。",
+    "tags": ["KV Cache", "显存管理", "显存利用率"]
   }
 ]
