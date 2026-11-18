@@ -178,5 +178,65 @@
     "answer": ["C"],
     "explanation": "更大的 batch 可以摊薄模型权重读取成本，并提高 GPU 计算并行度，从而提升吞吐量。但每个请求的 KV Cache 会占用显存，batch 增大也会增加访存流量和调度开销，因此 batch size 受资源与延迟目标约束，不能无限增大。",
     "tags": ["Continuous Batching", "Batch Size", "吞吐量"]
+  },
+  {
+    "id": "llm-inference-kv-block-allocation-preemption",
+    "subject": "人工智能",
+    "chapter": "大语言模型推理",
+    "knowledgePoints": ["连续批处理", "KV block", "抢占与恢复"],
+    "type": "single",
+    "difficulty": "medium",
+    "stem": "连续批处理运行中，如果显存不足以为运行序列分配下一个 KV block，推理引擎通常应怎样处理？",
+    "options": [
+      {
+        "key": "A",
+        "text": "无限等待显存自然释放，所有运行序列都保持不动"
+      },
+      {
+        "key": "B",
+        "text": "抢占部分运行序列并回收其 KV block，被抢占的序列可在资源充足后通过重算或换入恢复执行"
+      },
+      {
+        "key": "C",
+        "text": "直接丢弃该序列已经生成的文本，并将其标记为正常完成"
+      },
+      {
+        "key": "D",
+        "text": "将剩余 KV Cache 自动替换为零值，从而在不增加计算或传输开销的情况下继续解码"
+      }
+    ],
+    "answer": ["B"],
+    "explanation": "显存不足时，推理引擎可通过抢占部分序列释放 KV block。被抢占序列的 KV Cache 可以换出到 CPU 后再换入，也可以丢弃后在恢复时根据已有 token 重算；请求的逻辑状态和已生成文本不应被直接丢弃。",
+    "tags": ["Continuous Batching", "Preemption", "显存管理"]
+  },
+  {
+    "id": "llm-inference-chunked-prefill-latency",
+    "subject": "人工智能",
+    "chapter": "大语言模型推理",
+    "knowledgePoints": ["Chunked Prefill", "Prefill/Decode 混合调度", "迭代延迟"],
+    "type": "single",
+    "difficulty": "medium",
+    "stem": "把一个很长的 prefill 直接加入正在运行的 decode 批次，可能明显拉长其他请求本次迭代的等待时间。分块 prefill（chunked prefill）主要如何缓解这一问题？",
+    "options": [
+      {
+        "key": "A",
+        "text": "先无因果掩码并行处理整个提示词，再把结果拆成小块加入 decode"
+      },
+      {
+        "key": "B",
+        "text": "将所有 decode 请求暂停到 prefill 完整结束，从而避免任何请求等待"
+      },
+      {
+        "key": "C",
+        "text": "把长提示词中较早 token 的 KV Cache 永久丢弃，使 prefill 工作量固定不变"
+      },
+      {
+        "key": "D",
+        "text": "将长 prefill 拆成较小的块，分多次迭代与 decode 请求混合调度，从而限制单次迭代的耗时"
+      }
+    ],
+    "answer": ["D"],
+    "explanation": "Chunked prefill 将长提示词拆成多个受 token 预算约束的小块，在不同迭代中逐步处理，并可与 decode 请求混合调度。这样不会消除总 prefill 工作量，但能避免一个长 prefill 独占单次迭代，减小其他 decode 请求的等待时间和延迟尖峰。",
+    "tags": ["Chunked Prefill", "混合调度", "延迟优化"]
   }
 ]
