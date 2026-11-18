@@ -27,9 +27,7 @@
     ],
     "answer": ["B"],
     "explanation": "KV Cache 缓存的是历史 token 的 K、V，而不是 Q。解码新 token 时仍需计算并缓存它自己的 K、V；新 Q 需要与缓存中的历史 K 计算注意力，因此单步注意力开销会随序列长度增长。",
-    "tags": ["KV Cache", "Decode"],
-    "source": "screenshot-001.png",
-    "sourceOrder": 1
+    "tags": ["KV Cache", "Decode"]
   },
   {
     "id": "llm-inference-decode-memory-bandwidth",
@@ -59,9 +57,7 @@
     ],
     "answer": ["D"],
     "explanation": "单请求解码每步只生成一个 token，矩阵计算难以充分并行，算术强度较低；与此同时仍需读取模型权重，并访问随序列增长的 KV Cache，因此通常更受显存带宽限制。",
-    "tags": ["性能优化", "Memory Bound", "Decode"],
-    "source": "screenshot-001.png",
-    "sourceOrder": 2
+    "tags": ["性能优化", "Memory Bound", "Decode"]
   },
   {
     "id": "llm-inference-continuous-batching-scheduling",
@@ -91,9 +87,7 @@
     ],
     "answer": ["A"],
     "explanation": "连续批处理把调度粒度从整个请求缩小到解码迭代。不同长度的请求可以动态加入或退出批次，减少静态批处理中等待同批其他请求结束造成的资源浪费。",
-    "tags": ["Continuous Batching", "吞吐量"],
-    "source": "screenshot-001.png",
-    "sourceOrder": 3
+    "tags": ["Continuous Batching", "吞吐量"]
   },
   {
     "id": "llm-inference-paged-attention-block-size",
@@ -123,9 +117,7 @@
     ],
     "answer": ["B"],
     "explanation": "相同长度的序列使用更大的 block 后，所需块数及块表项更少，管理开销下降；但最后一个块未填满时浪费的空间可能更多，且显存分配粒度变粗。",
-    "tags": ["PagedAttention", "显存管理"],
-    "source": "screenshot-001.png",
-    "sourceOrder": 4
+    "tags": ["PagedAttention", "显存管理"]
   },
   {
     "id": "llm-inference-gqa-kv-cache",
@@ -155,9 +147,7 @@
     ],
     "answer": ["C"],
     "explanation": "GQA 让一组 query head 共享同一组 K、V 投影。KV head 数少于 query head 数，因此需要缓存和读取的 K、V 份数减少，从而降低 KV Cache 的显存占用与带宽开销。",
-    "tags": ["GQA", "注意力机制", "显存优化"],
-    "source": "screenshot-002.png",
-    "sourceOrder": 1
+    "tags": ["GQA", "注意力机制", "显存优化"]
   },
   {
     "id": "llm-inference-continuous-batching-size-limit",
@@ -187,8 +177,6 @@
     ],
     "answer": ["C"],
     "explanation": "更大的 batch 可以摊薄模型权重读取成本，并提高 GPU 计算并行度，从而提升吞吐量。但每个请求的 KV Cache 会占用显存，batch 增大也会增加访存流量和调度开销，因此 batch size 受资源与延迟目标约束，不能无限增大。",
-    "tags": ["Continuous Batching", "Batch Size", "吞吐量"],
-    "source": "screenshot-002.png",
-    "sourceOrder": 2
+    "tags": ["Continuous Batching", "Batch Size", "吞吐量"]
   }
 ]
